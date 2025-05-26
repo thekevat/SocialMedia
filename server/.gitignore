@@ -1,0 +1,16 @@
+# dependencies
+/node_modules
+
+# dotenv environment variables
+.env
+
+# logs
+logs
+*.log
+
+# OS files
+.DS_Store
+
+# optional: editor configs
+.vscode/
+.idea/

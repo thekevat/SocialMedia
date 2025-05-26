@@ -1,0 +1,15 @@
+# dependencies
+/node_modules
+
+
+
+# logs
+logs
+*.log
+
+# OS files
+.DS_Store
+
+# optional: editor configs
+.vscode/
+.idea/
