@@ -1,0 +1,137 @@
+import React, { useState, useEffect, useRef } from "react";
+import { getUser } from "../../Api/UserRequest";
+import { getMessages } from "../../Api/messageRequest";
+import "./ChatBox.css";
+import { format } from "timeago.js";
+import InputEmoji from "react-input-emoji";
+import { addMessages } from "../../Api/messageRequest";
+
+const ChatBox = ({ chat, currentUser,setSendMessage,receiveMessage }) => {
+  const [userData, setUserData] = useState(null);
+  const [messages, setMessages] = useState(null);
+  const [newMessage, setNewMessage] = useState("");
+  const scroll=useRef();
+  useEffect(()=>{
+    if(receiveMessage!==null && receiveMessage.chatId===chat._id){
+      setMessages([...messages,receiveMessage]);
+    }
+  },[receiveMessage])
+  useEffect(() => {
+    const userId = chat?.members?.find((id) => id !== currentUser);
+    const getUserData = async () => {
+      try {
+        const { data } = await getUser(userId);
+        setUserData(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (chat !== null) getUserData();
+  }, [chat, currentUser]);
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const { data } = await getMessages(chat._id);
+        setMessages(data);
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (chat !== null) fetchMessages();
+  }, [chat]);
+  const handleChange = (newMessage) => {
+    setNewMessage(newMessage);
+  };
+  const handleSend = async (e) => {
+    e.preventDefault();
+    const message = {
+      senderId: currentUser,
+      text: newMessage,
+      chatId: chat._id,
+    };
+    try {
+      const { data } = await addMessages(message);
+      setMessages([...messages, data]);
+      setNewMessage("");
+    } catch (error) {
+      console.log(error);
+    }
+    const receiverId=chat.members.find((id)=>id!==currentUser);
+    setSendMessage({...message,receiverId});
+    console.log(message);
+  };
+  useEffect(()=>{
+    scroll.current?.scrollIntoView({behavior:"smooth"});
+  },[messages])
+  return (
+    <>
+      <div className="ChatBox-container">
+        {chat !== null ? (
+          <>
+            <div className="chat-header">
+              <div className="follower">
+                <div className="required">
+                  <div>
+                    <img
+                      src={
+                        userData?.profilepicture
+                          ? process.env.REACT_APP_PUBLIC_FOLDER +
+                            userData.profilepicture
+                          : process.env.REACT_APP_PUBLIC_FOLDER + "profile.png"
+                      }
+                      className="followerImage"
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "50%",
+                      }}
+                    />
+                  </div>
+
+                  <div className="name" style={{ fontSize: "0.8rem" }}>
+                    <span>
+                      {userData?.firstname} {userData?.lastname}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <hr style={{ width: "85%", border: "0.1px solid #ececec" }} />
+            </div>
+            <div className="chat-body">
+              {messages !== null
+                ? messages.map((message) => (
+                    <>
+                      <div ref={scroll}
+                        className={
+                          message.senderId === currentUser
+                            ? "message own"
+                            : "message"
+                        }
+                      >
+                        <span>{message.text}</span>
+                        <span>{format(message.createdAt)}</span>
+                      </div>
+                    </>
+                  ))
+                : ""}
+            </div>
+            <div className="chat-sender">
+              <div>+</div>
+              <InputEmoji value={newMessage} onChange={handleChange} />
+              <div className="button send-button" onClick={handleSend}>
+                Send
+              </div>
+            </div>
+          </>
+        ) : (
+          <span className="chatbox-empty-message">
+            Tap on a chat to start conversation...
+          </span>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default ChatBox;
