@@ -9,6 +9,18 @@ const timelineReducer = (
       return { ...state, posts: action.data, loading: false, error: false };
     case "RETRIEVE_FAIL":
       return { ...state, loading: false, error: true };
+    case "DELETE_POST":
+      return {
+        ...state,
+        posts: state.posts.filter((post) => post._id !== action.payload),
+      };
+    case "ADD_NEW_POST_TO_TIMELINE":
+      console.log(action.payload);
+      return {
+        ...state,
+        posts : [action.payload,...state.posts],
+      } 
+     
     default:
       return state;
   }

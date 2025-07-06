@@ -7,32 +7,88 @@ const io = require("socket.io")(8800, {
 let activeUsers = [];
 
 io.on("connection", (socket) => {
+  console.log("🔌 User connected:", socket.id);
+
+  // Add new user to active user pool
   socket.on("add-new-user", (newUserId) => {
-    if (
-      !activeUsers.some(
-        (user) => user.userId === newUserId || user.socketId === socket.id
-      )
-    ) {
+    const alreadyExists = activeUsers.some(
+      (user) => user.userId === newUserId || user.socketId === socket.id
+    );
+
+    if (!alreadyExists) {
       activeUsers.push({
         userId: newUserId,
         socketId: socket.id,
       });
-     
+      console.log("✅ User added to activeUsers:", newUserId);
     }
 
-    io.emit("get-users", activeUsers);
+    io.emit("get-users", activeUsers); // Notify all clients of new online list
   });
-  socket.on('send-message',(data)=>{
-    const {receiverId}=data;
-    const user=activeUsers.find((user)=>user.userId===receiverId);
-  
-    if(user){
-      io.to(user.socketId).emit("receive-message",data);
+
+  // Respond to manual request to get online users
+  socket.on("get-online-users", () => {
+    socket.emit("get-users", activeUsers);
+  });
+
+  // Handle sending a message
+  socket.on("send-message", (data) => {
+    const { receiverId } = data;
+    const user = activeUsers.find((u) => u.userId === receiverId);
+    if (user) {
+      io.to(user.socketId).emit("receive-message", data);
     }
-  })
+  });
+
+  // Follow: Notify the followed user
+  socket.on("user-follow", ({ userId, followedUserId }) => {
+    const followedUser = activeUsers.find((u) => u.userId === followedUserId);
+    if (followedUser) {
+      io.to(followedUser.socketId).emit("update-followers", {
+        type: "follow",
+        userId,
+      });
+    }
+  });
+
+  // Unfollow: Notify the unfollowed user
+  socket.on("user-unfollow", ({ userId, unfollowedUserId }) => {
+    const unfollowedUser = activeUsers.find(
+      (u) => u.userId === unfollowedUserId
+    );
+    if (unfollowedUser) {
+      io.to(unfollowedUser.socketId).emit("update-followers", {
+        type: "unfollow",
+        userId,
+      });
+    }
+  });
+
+  // Notify all users of a profile picture update
+  socket.on("profile-updated", ({ userId, profilepicture }) => {
+    socket.broadcast.emit("profile-updated", { userId, profilepicture });
+  });
+
+  socket.on("profile-updated", ({ userId, profilepicture }) => {
+    socket.broadcast.emit("profile-updated-conv", { userId, profilepicture });
+  });
+  socket.on("profile-updated", ({ userId, profilepicture }) => {
+    socket.broadcast.emit("profile-updated-chtb", { userId, profilepicture });
+  });
+  socket.on("new-post", ({ post }) => {
+  if (post && post.userId) {
+    console.log("📡 Broadcasting new post:", post);
+    io.emit("receive-post", post);
+  } else {
+    console.warn("⚠️ Invalid post received:", post);
+  }
+});
+
+
+  // Handle disconnect
   socket.on("disconnect", () => {
-    activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
-  
+    activeUsers = activeUsers.filter((u) => u.socketId !== socket.id);
+    console.log("❌ Disconnected:", socket.id);
     io.emit("get-users", activeUsers);
   });
 });

@@ -97,6 +97,7 @@ export const followUser = async (req, res) => {
     }
   }
 };
+
 export const unFollowUser = async (req, res) => {
   const id = req.params.id;
   const { _id } = req.body;
@@ -113,7 +114,7 @@ export const unFollowUser = async (req, res) => {
           members: { $all: [id, _id] },
         });
         if (existingChat) {
-          await existingChat.deleteOne(); 
+          await existingChat.deleteOne();
         }
         return res.status(200).json("User unfollowed!");
       } else {

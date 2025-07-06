@@ -1,12 +1,14 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button } from "@mantine/core";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../../actions/userAction";
-import {uploadImage} from "../../actions/uploadAction"
+import { uploadImage } from "../../actions/uploadAction";
+import { SocketContext } from "../../context/SocketContext";
 
 function ProfileModal({ modalOpened, setModalOpened, data }) {
+  const socket=useContext(SocketContext);
   const { password, ...other } = data;
   const [formData, setFormData] = useState(other);
   const [profileImage, setProfileImage] = useState(null);
@@ -25,37 +27,35 @@ function ProfileModal({ modalOpened, setModalOpened, data }) {
         : setCoverImage(img);
     }
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let userData = formData;
-    if (profileImage) {
-      const data = new FormData();
-      const filename=Date.now()+profileImage.name;
-      data.append("name",filename);
-      data.append("file",profileImage);
-      userData.profilepicture=filename;
-      try{
-        dispatch(uploadImage(data));
-       }catch(error){
-         console.log(error);
-       }
-    }
-    if(coverImage){
-      const data = new FormData();
-      const filename=Date.now()+coverImage.name;
-      data.append("name",filename);
-      data.append("file",coverImage);
-      userData.coverpicture=filename;
-      try{
-       dispatch(uploadImage(data));
-      }catch(error){
-        console.log(error);
-      }
-    }
-    dispatch(updateUser(params.id,userData));
-  };
 
+    try {
+      if (profileImage) {
+        const data = new FormData();
+        data.append("file", profileImage);
+        const res = await dispatch(uploadImage(data));
+        userData.profilepicture = res.data.imageUrl; // Correct Cloudinary URL
+        socket.current.emit("profile-updated", {
+          userId: user._id,
+          profilepicture: res.data.imageUrl,
+        });
+      }
+
+      if (coverImage) {
+        const data = new FormData();
+        data.append("file", coverImage);
+        const res = await dispatch(uploadImage(data));
+        userData.coverpicture = res.data.imageUrl;
+      }
+
+      dispatch(updateUser(params.id, userData));
+      setModalOpened(false); // Close modal on success
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <Modal
@@ -122,7 +122,7 @@ function ProfileModal({ modalOpened, setModalOpened, data }) {
               name="Relationship"
               placeholder="Relationship Status"
               onChange={handleChange}
-              value={formData.Relarionship}
+              value={formData.Relationship}
             />
           </div>
           <div>

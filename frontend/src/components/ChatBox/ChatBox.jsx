@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { getUser } from "../../Api/UserRequest";
 import { getMessages } from "../../Api/messageRequest";
 import "./ChatBox.css";
 import { format } from "timeago.js";
 import InputEmoji from "react-input-emoji";
 import { addMessages } from "../../Api/messageRequest";
+import { SocketContext } from "../../context/SocketContext";
 
-const ChatBox = ({ chat, currentUser,setSendMessage,receiveMessage }) => {
+const ChatBox = ({ chat, currentUser, setSendMessage, receiveMessage }) => {
+  const socket = useContext(SocketContext);
   const [userData, setUserData] = useState(null);
   const [messages, setMessages] = useState(null);
   const [newMessage, setNewMessage] = useState("");
-  const scroll=useRef();
-  useEffect(()=>{
-    if(receiveMessage!==null && receiveMessage.chatId===chat._id){
-      setMessages([...messages,receiveMessage]);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const scroll = useRef();
+  useEffect(() => {
+    if (receiveMessage !== null && receiveMessage.chatId === chat._id) {
+      setMessages([...messages, receiveMessage]);
     }
-  },[receiveMessage])
+  }, [receiveMessage]);
   useEffect(() => {
     const userId = chat?.members?.find((id) => id !== currentUser);
     const getUserData = async () => {
@@ -26,8 +29,28 @@ const ChatBox = ({ chat, currentUser,setSendMessage,receiveMessage }) => {
         console.log(error);
       }
     };
-    if (chat !== null) getUserData();
+    if (chat !== null) {
+      getUserData();
+    }
   }, [chat, currentUser]);
+  useEffect(() => {
+    setProfilePicture(userData?.profilepicture);
+  }, userData);
+  useEffect(() => {
+    if (!socket.current) return;
+
+    const handleProfileUpdate = ({ userId, profilepicture }) => {
+      if (userId === userData?._id) {
+        setProfilePicture(profilepicture);
+      }
+    };
+
+    socket.current.on("profile-updated-chtb", handleProfileUpdate);
+
+    return () => {
+      socket.current.off("profile-updated-chtb", handleProfileUpdate);
+    };
+  }, [socket, userData]);
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -53,17 +76,18 @@ const ChatBox = ({ chat, currentUser,setSendMessage,receiveMessage }) => {
     try {
       const { data } = await addMessages(message);
       setMessages([...messages, data]);
+
       setNewMessage("");
     } catch (error) {
       console.log(error);
     }
-    const receiverId=chat.members.find((id)=>id!==currentUser);
-    setSendMessage({...message,receiverId});
+    const receiverId = chat.members.find((id) => id !== currentUser);
+    setSendMessage({ ...message, receiverId });
     console.log(message);
   };
-  useEffect(()=>{
-    scroll.current?.scrollIntoView({behavior:"smooth"});
-  },[messages])
+  useEffect(() => {
+    scroll.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
   return (
     <>
       <div className="ChatBox-container">
@@ -75,10 +99,8 @@ const ChatBox = ({ chat, currentUser,setSendMessage,receiveMessage }) => {
                   <div>
                     <img
                       src={
-                        userData?.profilepicture
-                          ? process.env.REACT_APP_PUBLIC_FOLDER +
-                            userData.profilepicture
-                          : process.env.REACT_APP_PUBLIC_FOLDER + "profile.png"
+                        profilePicture ||
+                        process.env.REACT_APP_PUBLIC_FOLDER + "profile.png"
                       }
                       className="followerImage"
                       style={{
@@ -102,7 +124,8 @@ const ChatBox = ({ chat, currentUser,setSendMessage,receiveMessage }) => {
               {messages !== null
                 ? messages.map((message) => (
                     <>
-                      <div ref={scroll}
+                      <div
+                        ref={scroll}
                         className={
                           message.senderId === currentUser
                             ? "message own"

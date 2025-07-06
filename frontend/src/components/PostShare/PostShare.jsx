@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import "./PostShare.css";
 import ProfileImage from "../../img/profileImg.jpg";
 import { UilScenery } from "@iconscout/react-unicons";
@@ -10,10 +10,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { uploadImage } from "../../actions/uploadAction";
 import { uploadPost } from "../../actions/uploadAction";
 import { getTimeLinePosts } from "../../actions/postAction";
+import { SocketContext } from "../../context/SocketContext";
 
 const PostShare = () => {
   const dispatch=useDispatch();
   const uploading=useSelector((state)=>state.postReducer.uploading);
+  const socket=useContext(SocketContext);
   const [image, setImage] = useState(null);
   const imageRef = useRef();
   const desc = useRef();
@@ -27,6 +29,7 @@ const PostShare = () => {
     if (event.target.files && event.target.files[0]) {
       let img = event.target.files[0];
       setImage(img);
+      
     }
   };
   const handleSubmit = async(e) => {
@@ -44,17 +47,18 @@ const PostShare = () => {
        const res = await dispatch(uploadImage(data));
      
       newPost.image = res.data.imageUrl;
+     
       }catch(error){
         console.log(error);
       }
     }
-    dispatch(uploadPost(newPost));
+    dispatch(uploadPost(newPost,socket));
     
     reset();
   };
   return (
     <div className="PostShare">
-      <img src={user.profilepicture?serverPublic+user.profilepicture:serverPublic+"profile.png"} />
+      <img src={user.profilepicture || serverPublic+"profile.png"} />
       <div>
         <input
           ref={desc}

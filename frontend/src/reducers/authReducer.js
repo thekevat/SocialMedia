@@ -36,8 +36,46 @@ const authReducer = (
           },
         },
       };
-      case "UNFOLLOW_USER":
-        return {...state,authData:{...state.authData,user:{...state.authData.user,following:[...state.authData.user.following.filter((personId)=>personId!==action.data)]}}}
+    case "UNFOLLOW_USER":
+      return {
+        ...state,
+        authData: {
+          ...state.authData,
+          user: {
+            ...state.authData.user,
+            following: [
+              ...state.authData.user.following.filter(
+                (personId) => personId !== action.data
+              ),
+            ],
+          },
+        },
+      };
+    case "RECEIVED_FOLLOW":
+      if (state.authData.user.follower.includes(action.data)) return state; 
+      return {
+        ...state,
+        authData: {
+          ...state.authData,
+          user: {
+            ...state.authData.user,
+            follower: [...state.authData.user.follower, action.data],
+          },
+        },
+      };
+    case "RECEIVED_UNFOLLOW":
+      return {
+        ...state,
+        authData: {
+          ...state.authData,
+          user: {
+            ...state.authData.user,
+            follower: state.authData.user.follower.filter(
+              (id) => id !== action.data
+            ),
+          },
+        },
+      };
     default:
       return state;
   }

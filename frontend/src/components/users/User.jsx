@@ -1,27 +1,82 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { followUser, unFollowUser } from "../../actions/userAction";
+import { SocketContext } from "../../context/SocketContext";
 
-const User = ({person}) => {
-  const serverPublic=process.env.REACT_APP_PUBLIC_FOLDER
-  const dispatch=useDispatch();
- 
-  const {user}=useSelector((state)=>state.authReducer.authData);
-  const [following,setFollowing]=useState(user.following.includes(person._id));
-  const handleClick=()=>{
-     following?dispatch(unFollowUser(person._id,user)):dispatch(followUser(person._id,user));
-     setFollowing((prev)=>!prev)
-  }
+const User = ({ person }) => {
+  const serverPublic = process.env.REACT_APP_PUBLIC_FOLDER;
+  const dispatch = useDispatch();
+  const socket = useContext(SocketContext);
+  const { user } = useSelector((state) => state.authReducer.authData);
+
+  // Local states
+  const [following, setFollowing] = useState(
+    user.following.includes(person._id)
+  );
+  const [profilePicture, setProfilePicture] = useState(person.profilepicture);
+
+  // Listen for real-time profile picture update
+  useEffect(() => {
+    if (!socket.current) return;
+
+    const handleProfileUpdate = ({ userId, profilepicture }) => {
+      if (userId === person._id) {
+        setProfilePicture(profilepicture);
+      }
+    };
+
+    socket.current.on("profile-updated", handleProfileUpdate);
+
+    return () => {
+      socket.current.off("profile-updated", handleProfileUpdate);
+    };
+  }, [socket, person._id]);
+
+  // Follow/unfollow logic
+  const handleClick = () => {
+    if (following) {
+      dispatch(unFollowUser(person._id, user));
+      socket.current.emit("user-unfollow", {
+        userId: user._id,
+        unfollowedUserId: person._id,
+      });
+
+      socket.current.emit("refresh-chats", {
+        targetUserId: person._id,
+      });
+    } else {
+      dispatch(followUser(person._id, user));
+      socket.current.emit("user-follow", {
+        userId: user._id,
+        followedUserId: person._id,
+      });
+
+      socket.current.emit("refresh-chats", {
+        targetUserId: person._id,
+      });
+    }
+
+    setFollowing((prev) => !prev);
+  };
+
   return (
     <div className="Follower">
       <div>
-        <img src={person.profilepicture?serverPublic+person.profilepicture:serverPublic+"profile.png"} className="FollowerImage" />
+        <img
+          src={profilePicture || `${serverPublic}profile.png`}
+          className="FollowerImage"
+          alt="Profile"
+        />
         <div className="Name">
           <span>{person.firstname}</span>
-          {/* <span>{person.username}</span> */}
         </div>
       </div>
-      <button className={following?"button button-fc unFollowButton":"button button-fc"} onClick={handleClick}>{following?"Unfollow":"Follow"}</button>
+      <button
+        className={`button button-fc ${following ? "unFollowButton" : ""}`}
+        onClick={handleClick}
+      >
+        {following ? "Unfollow" : "Follow"}
+      </button>
     </div>
   );
 };
