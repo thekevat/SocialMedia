@@ -25,7 +25,7 @@ function App() {
   // Connect to socket
   useEffect(() => {
     if (isAuthenticated && !socket.current) {
-      socket.current = io("http://localhost:8800");
+      socket.current = io("https://socialmedia-socket-vza5.onrender.com");
 
       socket.current.on("connect", () => {
         console.log("✅ Socket connected:", socket.current.id);
