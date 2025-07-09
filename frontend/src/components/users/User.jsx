@@ -64,7 +64,7 @@ const User = ({ person,onFollowChange }) => {
     <div className="Follower">
       <div>
         <img
-          src={profilePicture || `${serverPublic}profile.png`}
+          src={profilePicture || serverPublic+"profiledef.png"}
           className="FollowerImage"
           alt="Profile"
         />
