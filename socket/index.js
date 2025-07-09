@@ -96,3 +96,4 @@ socket.on("new-register-user",(user)=>{
     io.emit("get-users", activeUsers);
   });
 });
+console.log("running");
