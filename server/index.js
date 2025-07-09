@@ -20,7 +20,7 @@ app.use('/images',express.static("images"));
 dotenv.config();
 mongoose
   .connect(process.env.MONGO_DB)
-  .then(() => app.listen(process.env.PORT, console.log("Listening")))
+  .then(() => app.listen(process.env.PORT || 5000, console.log("Listening")))
   .catch((error) => console.log(error));
  
   app.use('/auth',AuthRoute);
