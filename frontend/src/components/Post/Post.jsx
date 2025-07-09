@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./Post.css";
 import comment from "../../img/comment.png";
 import like from "../../img/like.png";
@@ -11,20 +11,16 @@ import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { deletePostAction } from "../../actions/uploadAction";
 import { getUser } from "../../Api/UserRequest";
-
+import { SocketContext } from "../../context/SocketContext";
 
 const Post = ({ data }) => {
-
-
-
-
  
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.authReducer.authData);
-  const [liked, setLiked] = useState(data.likes.includes(user._id));
-  const [likes, setLikes] = useState(data.likes.length);
-   const [postUser, setPostUser] = useState({});
-   useEffect(() => {
+ 
+  const socket = useContext(SocketContext);
+  const [postUser, setPostUser] = useState({});
+  useEffect(() => {
     const fetchPostUser = async () => {
       try {
         const { data: userData } = await getUser(data.userId);
@@ -38,14 +34,19 @@ const Post = ({ data }) => {
   }, [data.userId]);
   const { id: profileId } = useParams(); // 'id' from URL param when on profile page
 
-  const handleLike = () => {
-    setLiked((prev) => !prev);
-    setLikes((prev) => (liked ? prev - 1 : prev + 1));
-    likePost(data._id, user._id);
-  };
+  const liked = data.likes.includes(user._id);
+const likes = data.likes.length;
+
+const handleLike = () => {
+  likePost(data._id, user._id);
+  socket.current.emit("react", {
+    postId: data._id,
+    userId: user._id,
+  });
+};
 
   const handleDelete = (postId) => {
-   dispatch(deletePostAction(postId, user._id));
+    dispatch(deletePostAction(postId, user._id));
     console.log("Deleting post with id:", postId);
   };
 
@@ -75,10 +76,14 @@ const Post = ({ data }) => {
         )}
       </div>
 
-      <span style={{ color: "var(--gray)", fontSize: "12px" }}>{likes} likes</span>
+      <span style={{ color: "var(--gray)", fontSize: "12px" }}>
+        {likes} likes
+      </span>
 
       <div className="Details">
-        <span><b>{postUser?.firstname}</b></span>
+        <span>
+          <b>{postUser?.firstname}</b>
+        </span>
         <span>{data.desc}</span>
       </div>
     </div>

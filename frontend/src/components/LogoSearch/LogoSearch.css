@@ -17,15 +17,16 @@
     border:none;
     outline:none;
 }
-.s-icon{
-    display:flex;
-    align-items: centre;
-    justify-content: center;
-    background:linear-gradient(106.23deg,#f99827,#f95f35 100%);
-    border-radius: 5px;
-    padding:4px;
-    color:white;
+.s-icon {
+  display: flex;
+  align-items: center;        /* fixed */
+  justify-content: center;
+  background: #3f8efc;
+  border-radius: 5px;
+  padding: 4px;
+  color: white;
 }
+
 .s-icon:hover{
     cursor:pointer;
 }

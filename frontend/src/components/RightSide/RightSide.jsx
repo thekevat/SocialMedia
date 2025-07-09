@@ -7,13 +7,14 @@ import {UilSetting} from "@iconscout/react-unicons";
 import TrendCard from "../../components/TrendCard/TrendCard"
 import ShareModal from "../ShareModal/ShareModal";
 import {Link} from "react-router-dom"
+import Building from "../../img/building.png"
 
 const RightSide = () =>{
       const [modalOpened,setModalOpened]=useState(false);
     return(
         <div className="RightSide">
              <div className="Navicons">
-                <Link to={"../home"}><img src={Home}/></Link>
+                <Link to={"../home"}><img src={Building} style={{height:"30px", width:"auto"}}/></Link>
                 <UilSetting/>
                 <img src={Noti}/>
               <Link to={"../chat"}><img src={Comment}/></Link>

@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { verifyToken } from "../Middleware/authMiddleware.js";
 const router=express.Router();
 import dotenv from "dotenv";
 dotenv.config();
@@ -24,7 +25,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-router.post('/', upload.single("file"), (req, res) => {
+router.post('/',verifyToken,upload.single("file"), (req, res) => {
   try {
     // The uploaded file's Cloudinary URL
     const imageUrl = req.file.path;

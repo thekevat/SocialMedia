@@ -12,6 +12,8 @@ import Conversation from "../../components/Conversation/Conversation";
 import ChatBox from "../../components/ChatBox/ChatBox";
 import { SocketContext } from "../../context/SocketContext";
 import { OnlineUsersContext } from "../../context/onlineUsersContext";
+import { getToken } from "../../utils/auth";
+import Building from "../../img/building.png"
 
 const Chat = () => {
   const socket = useContext(SocketContext);
@@ -23,13 +25,24 @@ const Chat = () => {
   const [sendMessage, setSendMessage] = useState(null);
   const [receiveMessage, setReceiveMessage] = useState(null);
 
+  const handleTokenExpiry = () => {
+  alert("Session expired. Please log in again.");
+  localStorage.clear();
+  window.location.href = "/auth";
+};
+ 
   // Fetch user's chats
   const getChats = async () => {
+    const token=getToken();
     try {
-      const { data } = await userChats(user._id);
+      const { data } = await userChats(user._id,token);
       setChats(data);
     } catch (error) {
-      console.log(error);
+       if (error.response?.status === 401) {
+      handleTokenExpiry();
+    } else {
+      console.error("chat loading error:", error);
+    }
     }
   };
 
@@ -95,7 +108,7 @@ const Chat = () => {
         <div style={{ width: "20rem", alignSelf: "flex-end" }}>
           <div className="Navicons">
             <Link to="../home">
-              <img src={Home} alt="home" />
+             <img src={Building} style={{height:"30px", width:"auto"}}/>
             </Link>
             <UilSetting />
             <img src={Noti} alt="notifications" />

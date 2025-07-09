@@ -22,6 +22,23 @@ const postReducer = (
         ...state,
         posts: state.posts.filter((post) => post._id !== action.payload),
       };
+    case "TOGGLE_LIKE":
+      return {
+        ...state,
+        posts: state.posts.map((post) => {
+          if (post._id !== action.payload.postId) return post;
+
+          const { userId } = action.payload;
+          const userLiked = post.likes.includes(userId);
+
+          return {
+            ...post,
+            likes: userLiked
+              ? post.likes.filter((id) => id !== userId) // remove like
+              : [...post.likes, userId], // add like
+          };
+        }),
+      };
 
     default:
       return state;

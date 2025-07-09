@@ -48,7 +48,7 @@ const Conversation = ({ data, currentUserId, online }) => {
             <img
               src={
                 profilePicture ||
-                process.env.REACT_APP_PUBLIC_FOLDER + "profile.png"
+                process.env.REACT_APP_PUBLIC_FOLDER + "profiledef.png"
               }
               className="followerImage"
               style={{ width: "50px", height: "50px", borderRadius: "50%" }}

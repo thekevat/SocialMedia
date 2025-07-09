@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState} from "react";
 import "./ProfileCard.css";
-import Cover from "../../img/cover.jpg";
-import Profile from "../../img/profileImg.jpg";
+
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { SocketContext } from "../../context/SocketContext";
@@ -23,7 +22,7 @@ const ProfileCard = ({ location }) => {
           alt="cover-pic"
         />
         <img
-          src={user.profilepicture || serverPublic + "profile.png"}
+          src={user.profilepicture || serverPublic + "profiledef.png"}
           alt="profile-pic"
         />
       </div>
@@ -62,7 +61,7 @@ const ProfileCard = ({ location }) => {
       {location === "profilepage" ? (
         ""
       ) : (
-        <span>
+        <span style={{color:"#1E3A8A"}}>
           <Link
             style={{ textDecortion: "none", color: "inherit" }}
             to={`/profile/${user._id}`}

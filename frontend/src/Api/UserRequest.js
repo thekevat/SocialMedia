@@ -11,12 +11,30 @@ const API = axios.create({ baseURL: "http://localhost:5000" });
 //     return req;
 // });
 
-export const getUser=(userId)=>API.get(`/user/${userId}`);
+export const getUser = (userId) => API.get(`/user/${userId}`);
 
-export const updateUser=(id,formData)=>API.put(`/user/${id}`,formData);
+export const updateUser = (id, formData,token) => API.put(`/user/${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-export const getAllUsers=()=>API.get('/user');
+export const getAllUsers = (token) => API.get("/user",{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-export const followUser=(id,data)=>API.put(`/user/${id}/follow`,data);
+export const followUser = (id, data, token) =>
+  API.put(`/user/${id}/follow`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-export const unFollowUser=(id,data)=>API.put(`/user/${id}/unfollow`,data);
+export const unFollowUser = (id, data, token) =>
+  API.put(`/user/${id}/unfollow`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });

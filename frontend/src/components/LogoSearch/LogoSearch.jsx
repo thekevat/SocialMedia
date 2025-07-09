@@ -8,7 +8,7 @@ const LogoSearch = ({ searchQuery, setSearchQuery }) => {
   const isChatPage=location.pathname.startsWith("/chat");
   return (
     <div className="LogoSearch">
-      <img src={Logo} alt="logo of site" />
+      <img src={Logo} style={{ height: "40px", width: "auto" }} alt="logo of site" />
       {!isChatPage && <div className="Search">
         <input
           type="text"

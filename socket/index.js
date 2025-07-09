@@ -76,15 +76,19 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("profile-updated-chtb", { userId, profilepicture });
   });
   socket.on("new-post", ({ post }) => {
-  if (post && post.userId) {
-    console.log("📡 Broadcasting new post:", post);
-    io.emit("receive-post", post);
-  } else {
-    console.warn("⚠️ Invalid post received:", post);
-  }
-});
-
-
+    if (post && post.userId) {
+      console.log("📡 Broadcasting new post:", post);
+      io.emit("receive-post", post);
+    } else {
+      console.warn("⚠️ Invalid post received:", post);
+    }
+  });
+  socket.on("react", ({ postId, userId }) => {
+    io.emit("react", { postId, userId });
+  });
+socket.on("new-register-user",(user)=>{
+  socket.broadcast.emit("update-userlist",user);
+})
   // Handle disconnect
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((u) => u.socketId !== socket.id);

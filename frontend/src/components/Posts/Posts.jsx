@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import "./Posts.css";
 import { getTimeLinePosts } from "../../actions/postAction";
 import Post from "../Post/Post";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { SocketContext } from "../../context/SocketContext";
 
 const Posts = () => {
   const dispatch = useDispatch();
@@ -11,6 +12,21 @@ const Posts = () => {
   const { posts } = useSelector((state) => state.postReducer);
   const { loading, posts: timeline } = useSelector((state) => state.timelineReducer);
   const params = useParams();
+  const socket=useContext(SocketContext);
+ 
+  useEffect(() => {
+  if(!socket.current) return;
+  socket.current.on("react", ({ postId , userId}) => {
+    
+  
+    dispatch({
+      type: "TOGGLE_LIKE",
+      payload: { postId,userId },
+    });
+  });
+
+  return () => socket.current.off("react");
+}, [socket, dispatch]);
 
   useEffect(() => {
     dispatch(getTimeLinePosts(user._id));
@@ -42,7 +58,9 @@ const Posts = () => {
       {loading
         ? "Fetching Posts..."
         : uniquePosts.map((post, id) => (
+           
             <Post key={post._id} data={post} id={id} />
+          
           ))}
     </div>
   );

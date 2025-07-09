@@ -6,6 +6,7 @@ import { format } from "timeago.js";
 import InputEmoji from "react-input-emoji";
 import { addMessages } from "../../Api/messageRequest";
 import { SocketContext } from "../../context/SocketContext";
+import {getToken} from "../../utils/auth"
 
 const ChatBox = ({ chat, currentUser, setSendMessage, receiveMessage }) => {
   const socket = useContext(SocketContext);
@@ -14,6 +15,11 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receiveMessage }) => {
   const [newMessage, setNewMessage] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
   const scroll = useRef();
+  const handleTokenExpiry = () => {
+  alert("Session expired. Please log in again.");
+  localStorage.clear();
+  window.location.href = "/auth";
+};
   useEffect(() => {
     if (receiveMessage !== null && receiveMessage.chatId === chat._id) {
       setMessages([...messages, receiveMessage]);
@@ -73,13 +79,18 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receiveMessage }) => {
       text: newMessage,
       chatId: chat._id,
     };
+    const token=getToken();
     try {
-      const { data } = await addMessages(message);
+      const { data } = await addMessages(message,token);
       setMessages([...messages, data]);
 
       setNewMessage("");
     } catch (error) {
-      console.log(error);
+       if (error.response?.status === 401) {
+      handleTokenExpiry();
+    } else {
+      console.error("message error:", error);
+    }
     }
     const receiverId = chat.members.find((id) => id !== currentUser);
     setSendMessage({ ...message, receiverId });
@@ -100,7 +111,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receiveMessage }) => {
                     <img
                       src={
                         profilePicture ||
-                        process.env.REACT_APP_PUBLIC_FOLDER + "profile.png"
+                        process.env.REACT_APP_PUBLIC_FOLDER + "profiledef.png"
                       }
                       className="followerImage"
                       style={{

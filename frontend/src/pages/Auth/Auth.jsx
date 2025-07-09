@@ -1,17 +1,19 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./Auth.css";
 import { useDispatch, useSelector } from "react-redux";
 import logo from "../../img/logo.png";
 import { useState } from "react";
 import { logIn, signUp } from "../../actions/AuthAction";
 import authReducer from "../../reducers/authReducer.js";
+import { SocketContext } from "../../context/SocketContext.js";
 
 const Auth = () => {
   const dispatch = useDispatch();
-  const loading=useSelector((state)=>state.authReducer.loading)
+  const socket = useContext(SocketContext);
+  const loading = useSelector((state) => state.authReducer.loading);
   console.log(loading);
   const [isSignUp, setIsSignUp] = useState(true);
-  
+
   const [data, setData] = useState({
     firstname: "",
     lastname: "",
@@ -23,12 +25,24 @@ const Auth = () => {
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSignUp) {
-         data.password===data.confirmpass?dispatch(signUp(data)):setConfirmPass(false);
-    }
-    else{
+      if (data.password === data.confirmpass) {
+        await dispatch(signUp(data));
+
+        // 👇 Emit after signup and after Redux state has updated
+        const profile = JSON.parse(localStorage.getItem("profile"));
+        const newUser = profile?.user;
+
+        if (socket?.current && newUser) {
+          const { password, ...userWithoutPassword } = newUser;
+          socket.current.emit("new-register-user", userWithoutPassword);
+        }
+      } else {
+        setConfirmPass(false);
+      }
+    } else {
       dispatch(logIn(data));
     }
   };
@@ -47,8 +61,8 @@ const Auth = () => {
       <div className="a-left">
         <img src={logo} />
         <div className="webname">
-          <h1>Sandesh</h1>
-          <h6>Express, Connect, Transform</h6>
+          <h1>SuperLink</h1>
+          <h6>Simple, powerful. Like Superman flying.</h6>
         </div>
       </div>
       <div className="a-right">
@@ -127,8 +141,12 @@ const Auth = () => {
                 : "Don't have an account. Sign up!"}
             </span>
           </div>
-          <button type="submit" className="button info-button" disabled={loading}>
-            {loading?"Loading...":isSignUp ? "Sign up" : "Log in"}
+          <button
+            type="submit"
+            className="button info-button"
+            disabled={loading}
+          >
+            {loading ? "Loading..." : isSignUp ? "Sign up" : "Log in"}
           </button>
         </form>
       </div>

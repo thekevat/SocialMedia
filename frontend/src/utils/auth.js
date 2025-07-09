@@ -11,3 +11,12 @@ export const isTokenValid = (token) => {
     return false;
   }
 };
+
+export const getToken = () => {
+  try {
+    const profile = JSON.parse(localStorage.getItem("profile"));
+    return profile?.token || null;
+  } catch {
+    return null;
+  }
+};

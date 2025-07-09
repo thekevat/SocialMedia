@@ -11,8 +11,8 @@
     scroll-behavior: smooth;
 
     /* Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: var(--orange) transparent;
+    scrollbar-width: none;
+    scrollbar-color: var(--buttonBg) transparent;
 }
 .Follower{
     display:flex;
@@ -44,16 +44,16 @@
   
 }
 .unFollowButton{
-    color:var(--orange);
-    border:2px solid var(--orange);
+    color:var(--buttonBg);
+    border:2px solid var(--buttonBg);
     cursor:pointer;
     background: transparent;
 }
 .FollowersCard::-webkit-scrollbar {
-    width: 6px;
+     width: 0px;  /* Makes scrollbar invisible */
 }
 
 .FollowersCard::-webkit-scrollbar-thumb {
     background-color: #ccc;
-    border-radius: 4px;
+    /* border-radius: 4px; */
 }

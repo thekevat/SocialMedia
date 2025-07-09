@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { followUser, unFollowUser } from "../../actions/userAction";
 import { SocketContext } from "../../context/SocketContext";
 
-const User = ({ person }) => {
+const User = ({ person,onFollowChange }) => {
   const serverPublic = process.env.REACT_APP_PUBLIC_FOLDER;
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
@@ -33,9 +33,9 @@ const User = ({ person }) => {
   }, [socket, person._id]);
 
   // Follow/unfollow logic
-  const handleClick = () => {
+  const handleClick = async() => {
     if (following) {
-      dispatch(unFollowUser(person._id, user));
+      await dispatch(unFollowUser(person._id, user));
       socket.current.emit("user-unfollow", {
         userId: user._id,
         unfollowedUserId: person._id,
@@ -45,7 +45,7 @@ const User = ({ person }) => {
         targetUserId: person._id,
       });
     } else {
-      dispatch(followUser(person._id, user));
+      await dispatch(followUser(person._id, user));
       socket.current.emit("user-follow", {
         userId: user._id,
         followedUserId: person._id,
@@ -57,6 +57,7 @@ const User = ({ person }) => {
     }
 
     setFollowing((prev) => !prev);
+    if (onFollowChange) onFollowChange();
   };
 
   return (
