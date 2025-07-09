@@ -1,5 +1,5 @@
 import axios from "axios";
-const API=axios.create({baseURL:"http://localhost:5000"});
+const API=axios.create({baseURL:"https://socialmedia-backend-67gp.onrender.com"});
 export const uploadImage=(data,token)=>API.post('/upload/',data, {
     headers: {
       Authorization: `Bearer ${token}`,
