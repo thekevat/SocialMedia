@@ -4,3 +4,4 @@
 # dotenv environment variables
 .env
 
+/build
