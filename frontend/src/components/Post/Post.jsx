@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { deletePostAction } from "../../actions/uploadAction";
 import { getUser } from "../../Api/UserRequest";
 import { SocketContext } from "../../context/SocketContext";
+import { getToken } from "../../utils/auth";
 
 const Post = ({ data }) => {
  
@@ -37,8 +38,9 @@ const Post = ({ data }) => {
   const liked = data.likes.includes(user._id);
 const likes = data.likes.length;
 
-const handleLike = () => {
-  likePost(data._id, user._id);
+const handleLike = async() => {
+  const token= await getToken();
+  likePost(data._id, user._id,token);
   socket.current.emit("react", {
     postId: data._id,
     userId: user._id,

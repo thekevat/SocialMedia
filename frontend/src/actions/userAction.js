@@ -3,7 +3,7 @@ import { getToken } from "../utils/auth";
 
 
 export const updateUser = (id, formData) => async (dispatch) => {
-   const token=getToken();
+   const token= await getToken();
 
   dispatch({ type: "UPDATING_START" });
   try {
@@ -19,7 +19,7 @@ export const updateUser = (id, formData) => async (dispatch) => {
 };
 
 export const followUser = (id, data) => async (dispatch) => {
-  const token=getToken();
+  const token= await getToken();
 
   
   dispatch({ type: "FOLLOW_USER", data: id });
@@ -37,7 +37,7 @@ export const followUser = (id, data) => async (dispatch) => {
 };
 
 export const unFollowUser = (id, data) => async (dispatch) => {
-   const token=getToken();
+   const token= await getToken();
 
  
   dispatch({ type: "UNFOLLOW_USER", data: id });
@@ -57,6 +57,7 @@ export const unFollowUser = (id, data) => async (dispatch) => {
 // 🔒 Utility function to handle expired token
 const handleTokenExpiry = () => {
   alert("Session expired. Please log in again.");
+   window.location.href = "/auth";
   localStorage.clear();
-  window.location.href = "/auth";
+ 
 };

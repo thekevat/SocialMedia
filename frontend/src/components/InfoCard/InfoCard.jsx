@@ -58,7 +58,11 @@ const InfoCard = () => {
         </span>
         <span>{profileUser.worksAt}</span>
       </div>
-      <button className="button logout-button" onClick={handleLogOut}>Log out</button>
+    {profileUserId === user._id && (
+  <button className="button logout-button" onClick={handleLogOut}>
+    Log out
+  </button>
+)}
     </div>
   );
 };

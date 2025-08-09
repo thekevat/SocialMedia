@@ -19,9 +19,10 @@ export const getUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const id = req.params.id;
-  const { _id, currentUserAdminStatus, password } = req.body;
-  if (id === _id) {
+  const id = req.user.id;
+  req.body._id=id;
+  const {  currentUserAdminStatus, password } = req.body;
+ 
     try {
       if (password) {
         const salt = await bcrypt.genSalt(10);
@@ -39,11 +40,7 @@ export const updateUser = async (req, res) => {
     } catch (error) {
       return res.status(500).json(error);
     }
-  } else {
-    return res
-      .status(403)
-      .json("Access denied! You can only update your own profile");
-  }
+ 
 };
 
 export const deleteUser = async (req, res) => {
@@ -65,7 +62,7 @@ export const deleteUser = async (req, res) => {
 
 export const followUser = async (req, res) => {
   const id = req.params.id;
-  const { _id } = req.body;
+  const _id  = req.user.id;
   if (_id === id) {
     res.status(403).json("Action forbidden");
   } else {
@@ -100,7 +97,7 @@ export const followUser = async (req, res) => {
 
 export const unFollowUser = async (req, res) => {
   const id = req.params.id;
-  const { _id } = req.body;
+  const _id  = req.user.id;
   if (_id === id) {
     res.status(403).json("Action forbidden");
   } else {

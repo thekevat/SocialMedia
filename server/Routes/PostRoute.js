@@ -7,6 +7,6 @@ router.post('/',verifyToken,createPost);
 router.get('/:id',getPost);
 router.put('/:id',updatePost);
 router.delete('/:id',verifyToken,deletePost);
-router.put('/:id/react',reactPost);
-router.get('/:id/timeline',getTimeLinePosts);
+router.put('/:id/react',verifyToken,reactPost);
+router.get('/:id/timeline',verifyToken,getTimeLinePosts);
 export default router;

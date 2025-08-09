@@ -33,7 +33,9 @@ const User = ({ person,onFollowChange }) => {
   }, [socket, person._id]);
 
   // Follow/unfollow logic
-  const handleClick = async() => {
+  const handleClick = async(e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (following) {
       await dispatch(unFollowUser(person._id, user));
       socket.current.emit("user-unfollow", {

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./FollowersCard.css";
-
+import { Link } from "react-router-dom";
 import User from "../users/User";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllUsers } from "../../Api/UserRequest";
@@ -15,14 +15,13 @@ const FollowersCard = ({ searchQuery = "" }) => {
   const { user } = useSelector((state) => state.authReducer.authData);
 
   const handleTokenExpiry = () => {
-  alert("Session expired. Please log in again.");
-  localStorage.clear();
-  window.location.href = "/auth";
-};
-
+    alert("Session expired. Please log in again.");
+    window.location.href = "/auth";
+    localStorage.clear();
+  };
 
   const fetchPersons = async () => {
-    const token = getToken();
+    const token = await getToken();
     try {
       const { data } = await getAllUsers(token);
       setPersons(data);
@@ -64,12 +63,14 @@ const FollowersCard = ({ searchQuery = "" }) => {
       {filteredPersons.map((person, id) => {
         if (person._id !== user._id) {
           return (
-            <User
-              key={person._id}
-              person={person}
-              id={id}
-              onFollowChange={handleFollowChange}
-            />
+            <Link to={`/profile/${person._id}`}   style={{ textDecoration: "none", color: "inherit" }}>
+              <User
+                key={person._id}
+                person={person}
+                id={id}
+                onFollowChange={handleFollowChange}
+              />
+            </Link>
           );
         }
       })}

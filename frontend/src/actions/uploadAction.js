@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { getToken } from "../utils/auth";
 
 export const uploadImage = (data) => async (dispatch) => {
-  const token = getToken();
+  const token = await getToken();
   try {
     const response = await uploadApi.uploadImage(data, token);
     return response;
@@ -17,7 +17,7 @@ export const uploadImage = (data) => async (dispatch) => {
 };
 export const uploadPost = (data, socket) => async (dispatch) => {
   dispatch({ type: "UPLOAD_START" });
-  const token=getToken();
+  const token= await getToken();
   try {
     const newPost = await uploadApi.uploadPost(data,token);
     dispatch({ type: "UPLOAD_SUCCESS", data: newPost.data });
@@ -39,7 +39,7 @@ export const uploadPost = (data, socket) => async (dispatch) => {
 };
 
 export const deletePostAction = (postId, userId) => async (dispatch) => {
-  const token=getToken();
+  const token= await getToken();
   try {
     await uploadApi.deletePost(postId, userId,token);
     dispatch({ type: "DELETE_POST", payload: postId });

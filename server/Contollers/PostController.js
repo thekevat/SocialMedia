@@ -4,6 +4,8 @@ import UserModel from "../Models/userModel.js";
 import mongoose from "mongoose";
 
 export const createPost = async (req, res) => {
+  req.body.userId=req.user.id;
+ 
   const newPost = new PostModel(req.body);
   try {
     const post=await newPost.save();
@@ -40,7 +42,7 @@ export const updatePost = async (req, res) => {
 };
 export const deletePost = async (req, res) => {
   const id = req.params.id;
-  const { userId } = req.body;
+  const userId  = req.user.id;
   try {
     const post = await PostModel.findById(id);
     if (post.userId === userId) {
@@ -56,7 +58,8 @@ export const deletePost = async (req, res) => {
 
 export const reactPost = async (req, res) => {
   const id = req.params.id;
-  const { userId } = req.body;
+  const  userId  = req.user.id;
+ 
   try {
     const post = await PostModel.findById(id);
     if (!post.likes.includes(userId)) {
@@ -72,7 +75,7 @@ export const reactPost = async (req, res) => {
   }
 };
 export const getTimeLinePosts = async(req,res)=>{
-     const userId=req.params.id;
+     const userId=req.user.id;
      try{
          const currentUserPosts=await PostModel.find({userId:userId});
          const followingPosts = await UserModel.aggregate([
