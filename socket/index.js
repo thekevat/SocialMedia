@@ -1,5 +1,5 @@
 require("dotenv").config();
-const io = require("socket.io")(8800, {
+const io = require("socket.io")(https://socialmedia-socket-vza5.onrender.com, {
   cors: {
     origin: [process.env.FRONTEND_URL,"http://localhost:3000"],
     methods:["GET","POST"],
